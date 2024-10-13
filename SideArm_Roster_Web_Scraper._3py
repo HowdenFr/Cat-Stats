@@ -1,0 +1,119 @@
+#import the below things. Lxml will read the html file. 
+#requests will grab the website information.
+#don't use install for replit, use import. 
+from bs4 import BeautifulSoup
+import parser
+import requests
+import lxml
+import xlsxwriter
+import os
+import re
+
+
+
+yearNumber=2011
+currentYear=2024
+layout_String=["Player Name  ; Hometown  ;  School  ; Position  ;  Class  ; Height"]
+playerList=[]
+playerList.append(layout_String)
+
+def year_breaker(input_string):
+  if len(input_string)==4 or len(input_string)==11:
+    return str(input_string[1:4])
+  elif len(input_string)==5 or len(input_string)==12 or len(input_string)==13:
+    return str(input_string[2:5])
+  else:
+    return str(input_string[4:7])
+
+def position_breaker(input_string):
+  if len(input_string)==4 or len(input_string)==11:
+    return str(input_string[0:1])
+  elif len(input_string)==5 or len(input_string)==12 or len(input_string)==13:
+    return str(input_string[0:2])
+  else:
+    return str(input_string[0:4])
+    
+  
+
+def height_breaker(input_string):
+  real_height=input_string.split('.')
+  return real_height
+  
+for i in range(yearNumber,currentYear):
+  html_string='https://cuse.com/sports/field-hockey/roster'
+  
+  html_text = requests.get(html_string).text
+
+  
+  
+## can do print(html_text) without the .text
+#on the html_text to see the status on the website. 200 is the number
+#now with all the info in .text, do...
+  soup=BeautifulSoup(html_text, 'lxml')
+  players=soup.find_all('div', class_="s-person-card s-person-card--list flex flex-col overflow-hidden rounded-[10px] border s-person-card--theme-light-theme shadow-level-1 border")
+  for player in players:
+    playerElement=[]
+    # the following try and except are lookng 
+    # strings for name, hometown, highschool, year, position, 
+    #and height. the except AttributeError is shown when the 
+    #find for a class is not shown. 
+    try:
+  
+      Name=str(player.find('div', class_='s-person-details__personal-single-line s-text-paragraph-bold flex items-center gap-2').text)
+    except AttributeError:
+      Name=""
+    try:
+      Hometown=str(player.find('span', class_ = 's-person-card__content__person__location-item' ).text)
+    except AttributeError:
+      Hometown=""
+    try:
+      HighSchool=str(player.find('div', class_='s-person-card__content__location s-text-details mt-[16px] flex w-full flex-col whitespace-normal sm:mt-0 sm:w-[200px] sm:shrink-0').text)
+    except AttributeError:
+      HighSchool=""
+    try:
+      Year=str(player.find('div', class_='s-person-details__bio-stats s-text-details s-text-details-bold py-0.5').text)
+      Position=str(position_breaker(Year))
+      Height=str(height_breaker(Year)[1])
+      Year=str(year_breaker(Year))
+      
+      
+      
+    except AttributeError:
+      Year=""
+      Height=""
+      Position=""
+    
+    playerInfo = str(yearNumber)+ " ;  " +Name+ "  ; " + Hometown + '  ; ' + HighSchool + '  ; ' + Position + '  ; ' + Year+ '   ; ' + Height
+
+    playerElement.append(playerInfo)
+    playerList.append(playerElement)
+    
+
+  
+
+  yearNumber=yearNumber+1 #updating the year for the html
+
+  
+
+
+#this writes the players list onto a txt that can be sent out to others. 
+with open('FieldHockey.txt','w')as tfile:
+  for i in range(len(playerList)):
+    tfile.write('\n')
+    tfile.write('\n'.join(playerList[i]))
+
+    
+    
+    
+    
+
+
+
+
+
+
+
+    
+    
+    
+
